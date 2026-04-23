@@ -4,11 +4,10 @@ import pytesseract
 import cv2
 import numpy as np
 from PIL import Image
+import os
 
 app = Flask(__name__)
 app.secret_key = 'secret123'
-
-import os
 
 if os.name == "nt":
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
