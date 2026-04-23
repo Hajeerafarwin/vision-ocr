@@ -321,7 +321,7 @@
       {% endfor %}
     </div>
 
-    <a href="/clear_history"
+    <a href="{{ url_for('clear_history') }}"
        onclick="return confirm('Clear all history?')"
        class="clear-btn">
        Clear History

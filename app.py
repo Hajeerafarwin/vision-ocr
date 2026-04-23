@@ -85,33 +85,26 @@ def dashboard():
         file = request.files['image']
 
         if file:
-            img = Image.open(file)
-            img = np.array(img)
+            try:
+                img = Image.open(file).convert("RGB")
+                img = np.array(img)
 
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-            # enlarge image
-            gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+                # enlarge image
+        
+                lang = request.form.get('lang', 'eng')
+                text = pytesseract.image_to_string(gray, lang=lang)  
 
-            # remove noise
-            gray = cv2.GaussianBlur(gray, (3, 3), 0)
-
-            # make text darker / background cleaner
-            gray = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)[1]
-
-            h, w = gray.shape
-            gray = gray[25:h-35, 0:w]
-
-            lang = request.form.get('lang', 'eng')
-
-            custom_config = r'--oem 3 --psm 11'
-            text = pytesseract.image_to_string(gray, lang=lang, config=custom_config)  
-
-            c.execute(
-                "INSERT INTO history (username, filename, text) VALUES (?, ?, ?)",
-                (current_user, file.filename, text)
-            )
-            conn.commit()
+                c.execute(
+                    "INSERT INTO history (username, filename, text) VALUES (?, ?, ?)",
+                    (current_user, file.filename, text)
+                )
+                conn.commit()
+            
+            except Exception as e:
+                text = f"OCR Error: {str(e)}"
+        
 
     c.execute("SELECT filename, text FROM history WHERE username=? ORDER BY id DESC", (current_user,))
     history = c.fetchall()
@@ -119,6 +112,17 @@ def dashboard():
     conn.close()
 
     return render_template('dashboard.html', text=text, history=history, user=current_user)
+@app.route('/clear_history')
+def clear_history():
+    current_user = session.get('user')
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM history WHERE username=?", (current_user,))
+    conn.commit()
+    conn.close()
+
+    return redirect('/dashboard')
 
 
 if __name__ == '__main__':
