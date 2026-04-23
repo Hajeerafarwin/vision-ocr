@@ -78,35 +78,34 @@ def dashboard():
     text = ""
     current_user = session.get('user')
 
+    if not current_user:
+        return redirect('/')   # 🚨 IMPORTANT FIX
+
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
     if request.method == 'POST':
-        file = request.files['image']
+        file = request.files.get('image')
 
         if file:
             try:
                 img = Image.open(file).convert("RGB")
                 img = np.array(img)
-
                 gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-                # enlarge image
-        
                 lang = request.form.get('lang', 'eng')
-                text = pytesseract.image_to_string(gray, lang=lang)  
+                text = pytesseract.image_to_string(gray, lang=lang)
 
                 c.execute(
                     "INSERT INTO history (username, filename, text) VALUES (?, ?, ?)",
                     (current_user, file.filename, text)
                 )
                 conn.commit()
-            
+
             except Exception as e:
                 text = f"OCR Error: {str(e)}"
-        
 
-    c.execute("SELECT filename, text FROM history WHERE username=? ORDER BY id DESC", (current_user,))
+    c.execute("SELECT filename, text FROM history WHERE username=?", (current_user,))
     history = c.fetchall()
 
     conn.close()
@@ -116,8 +115,12 @@ def dashboard():
 def clear_history():
     current_user = session.get('user')
 
+    if not current_user:
+        return redirect('/')   # 🚨 IMPORTANT
+
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
+
     c.execute("DELETE FROM history WHERE username=?", (current_user,))
     conn.commit()
     conn.close()
