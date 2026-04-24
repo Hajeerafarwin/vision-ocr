@@ -93,8 +93,11 @@ def dashboard():
                 img = np.array(img)
                 gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
+                gray = cv2.GaussianBlur(gray, (3,3), 0)
+                _, gray = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+
                 lang = request.form.get('lang', 'eng')
-                text = pytesseract.image_to_string(gray, lang=lang)
+                text = pytesseract.image_to_string(gray, lang=f"eng+{lang}")
 
                 c.execute(
                     "INSERT INTO history (username, filename, text) VALUES (?, ?, ?)",
