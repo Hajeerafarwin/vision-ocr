@@ -96,11 +96,14 @@ def dashboard():
 
                 lang = request.form.get('lang', 'eng')
                 if lang == "tel":
-                    config = "--psm 11"
+                    gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+                    gray = cv2.GaussianBlur(gray, (3,3), 0)
+                    config = "--oem 1 --psm 6"
                 else:
-                     gray = cv2.GaussianBlur(gray, (3,3), 0)
-                     _, gray = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-                     config = "--psm 6"
+                    gray = cv2.GaussianBlur(gray, (3,3), 0)
+                    _, gray = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+                    config = "--psm 6"
+
                 text = pytesseract.image_to_string(gray, lang=lang, config=config)
 
                 c.execute(
