@@ -95,7 +95,13 @@ def dashboard():
 
 
                 lang = request.form.get('lang', 'eng')
-                if lang in ["mal", "tel"]:
+                if lang == "urd":
+                    # Urdu needs clean image (no threshold)
+                    gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+                    config = "--oem 1 --psm 6"
+
+
+                elif lang in ["mal", "tel"]:
                     # Preserve curves
                     gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
                     gray = cv2.medianBlur(gray, 3)
