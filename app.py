@@ -95,9 +95,10 @@ def dashboard():
 
 
                 lang = request.form.get('lang', 'eng')
-                if lang == "tel":
+                if lang in ["mal", "tel"]:
+                    # Preserve curves
                     gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
-                    gray = cv2.GaussianBlur(gray, (3,3), 0)
+                    gray = cv2.medianBlur(gray, 3)
                     config = "--oem 1 --psm 6"
                 else:
                     gray = cv2.GaussianBlur(gray, (3,3), 0)
