@@ -112,25 +112,8 @@ def dashboard():
                     _, gray = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
                     config = "--psm 6"
 
-                if mode == "table":
-                    data = pytesseract.image_to_data(gray, lang=lang, config=config, output_type=pytesseract.Output.DICT)
 
-                    text = ""
-                    last_line = -1
-
-                    for i in range(len(data["text"])):
-                        word = data["text"][i].strip()
-
-                        if word:
-                            line_num = data["line_num"][i]
-
-                            if line_num != last_line:
-                                text += "\n"
-                                last_line = line_num
-
-                            text += word + "\t"
-
-                elif mode == "math":
+                if mode == "math":
                     text = pytesseract.image_to_string(gray, lang="eng", config="--psm 6")
 
                 else:
