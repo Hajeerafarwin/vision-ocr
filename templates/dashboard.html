@@ -334,7 +334,10 @@
         <h2>Vision OCR</h2>
         <p>Upload, extract, copy, and manage your OCR results</p>
       </div>
-      <div class="profile-chip">👤 {{ user.split('@')[0] if user else '' }}</div>
+      <div class="profile-chip">
+        👤 {{ user.split('@')[0] if user else '' }}
+        | <a href="/logout" style="color:white; text-decoration:none;">Logout</a>
+      </div>
     </div>
 
     <div class="card-box">
@@ -364,7 +367,11 @@
             <option value="asm">Assamese</option>
             <option value="san">Sanskrit</option>
           </select>
-
+          <select name="mode" class="form-select mt-2">
+            <option value="normal">Normal OCR</option>
+            <option value="table">Table Extraction</option>
+            <option value="math">Math OCR</option>
+          </select>
           <button class="btn-extract" type="submit">Extract Text</button>
         </div>
       </form>

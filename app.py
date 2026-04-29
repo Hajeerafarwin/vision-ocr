@@ -95,6 +95,7 @@ def dashboard():
 
 
                 lang = request.form.get('lang', 'eng')
+                mode = request.form.get('mode', 'normal')
                 if lang == "urd":
                     # Urdu needs clean image (no threshold)
                     gray = cv2.resize(gray, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
@@ -111,7 +112,29 @@ def dashboard():
                     _, gray = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
                     config = "--psm 6"
 
-                text = pytesseract.image_to_string(gray, lang=lang, config=config)
+                if mode == "table":
+                    data = pytesseract.image_to_data(gray, lang=lang, config=config, output_type=pytesseract.Output.DICT)
+
+                    text = ""
+                    last_line = -1
+
+                    for i in range(len(data["text"])):
+                        word = data["text"][i].strip()
+
+                        if word:
+                            line_num = data["line_num"][i]
+
+                            if line_num != last_line:
+                                text += "\n"
+                                last_line = line_num
+
+                            text += word + "\t"
+
+                elif mode == "math":
+                    text = pytesseract.image_to_string(gray, lang="eng", config="--psm 6")
+
+                else:
+                    text = pytesseract.image_to_string(gray, lang=lang, config=config)
 
                 c.execute(
                     "INSERT INTO history (username, filename, text) VALUES (?, ?, ?)",
@@ -143,7 +166,10 @@ def clear_history():
     conn.close()
 
     return redirect('/dashboard')
-
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run(debug=True)
